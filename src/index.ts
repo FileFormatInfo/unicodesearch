@@ -17,67 +17,21 @@ import {
 	TooltipModule,
 } from "tabulator-tables";
 
-type logoDataType = {
-	logohandle: string;
+type SearchEntry = {
+	code: string;
 	name: string;
-	sort: string;
-	website: string;
-	ar21: boolean;
-	icon: boolean;
-	tile: boolean;
-	wikipedia?: string;
-	guide?: string;
-	tags: Map<string, string>;
-
-	// social fields
+	age: string;
+	block: string;
+	category: string;
 };
 
-type SocialMedia = {
-	id: string;
-	iconhtml: string;
-	logohandle: string;
-	pattern: string;
-};
-
-type SocialMediaApi = {
+type SearchData = {
 	success: boolean;
-	data: { sites: SocialMedia[] };
+	data: SearchEntry[];
 };
 
-const dataUrl = "https://www.vectorlogo.zone/util/apiall.json"; // for local testing
+const dataUrl = "/ucd.json";
 
-var rowPopupFormatter = function (e: any, row: any, onRendered: any) {
-	var data = row.getData() as logoDataType;
-	var container = document.createElement("div"),
-		contents = "<strong style='font-size:1.2em;'>SQL INSERT</strong><br/>";
-	contents += `<pre class="m-3">`;
-	contents += data.logohandle; // LATER: logo image
-	contents += `</pre>`;
-
-	container.innerHTML = contents;
-
-	window?.getSelection()?.removeAllRanges();
-
-	return container;
-};
-
-function websiteLabeler(cell: any) {
-	var value = cell.getValue();
-	if (!value) return "";
-
-	if (value.startsWith("http://")) {
-		value = value.substring(7);
-	} else if (value.startsWith("https://")) {
-		value = value.substring(8);
-	}
-	if (value.startsWith("www.")) {
-		value = value.substring(4);
-	}
-	if (value.endsWith("/") && value.indexOf("/") === value.length - 1) {
-		value = value.slice(0, -1);
-	}
-	return value;
-}
 
 function imgTooltipFn(imgType: string) {
 	return function (e: MouseEvent, cell: CellComponent, onRendered: any) {
@@ -115,19 +69,6 @@ function showError(msg: string) {
 	document.getElementById("loading")!.classList.add("d-none");
 	document.getElementById("errdiv")!.classList.remove("d-none");
 	document.getElementById("errmsg")!.innerHTML = msg;
-}
-
-function hasImage(suffix: string, images?: string[]) {
-	if (!images || images.length === 0) {
-		return false;
-	}
-
-	for (const img of images) {
-		if (img.endsWith(suffix)) {
-			return true;
-		}
-	}
-	return false;
 }
 
 function tagFormatter(cell: CellComponent) {
@@ -236,35 +177,9 @@ function nameFilter(
 }
 
 async function main() {
-	let socialmedia: SocialMedia[];
-	try {
-		const resp = await fetch(
-			"https://www.vectorlogo.zone/util/socialmedia.json",
-			{
-				method: "GET",
-				redirect: "follow",
-			}
-		);
-		if (!resp.ok) {
-			showError(
-				`HTTP Error fetching social media data: ${resp.status} ${resp.statusText}`
-			);
-			return;
-		}
-		var apiData = (await resp.json()) as SocialMediaApi;
-		if (!apiData.success) {
-			showError(`Error in social media data response`);
-			return;
-		}
-		socialmedia = apiData.data.sites;
-	} catch (error) {
-		showError(`Error fetching social media data: ${error}`);
-		return;
-	}
+	let data: SearchEntry[];
 
-	socialmedia = socialmedia.filter((sm) => sm.id != "wikipedia");
-
-	let rawData: any;
+	var rawData:any;
 	try {
 		const resp = await fetch(dataUrl, {
 			method: "GET",
@@ -276,32 +191,15 @@ async function main() {
 			);
 			return;
 		}
-		rawData = await resp.json();
+		rawData = (await resp.json() as SearchData);
 	} catch (error) {
-		showError(`Error fetching logo data: ${error}`);
+		showError(`Error fetching Unicode character data: ${error}`);
 		return;
 	}
 
-	console.log(rawData[0]);
+	data = rawData.data;
 
-	const data: logoDataType[] = [];
-	for (const row of rawData) {
-		if (row.logohandle == "microsoft") {
-			console.log(row);
-		}
-		data.push({
-			logohandle: row.logohandle,
-			name: row.title,
-			sort: row.sort,
-			website: row.website,
-			ar21: hasImage("-ar21.svg", row.images),
-			icon: hasImage("-icon.svg", row.images),
-			tile: hasImage("-tile.svg", row.images),
-			wikipedia: row.wikipedia,
-			guide: row.guide,
-			tags: makeTagMap(row, socialmedia),
-		});
-	}
+	console.log(data[0]);
 
 	Tabulator.registerModule([
 		EditModule,
@@ -321,88 +219,48 @@ async function main() {
 		data,
 		columns: [
 			{
-				cellDblClick: imgClickFn("ar21", "&zoom=4"),
-				field: "ar21",
-				formatter: "tickCross",
-				formatterParams: {
-					crossElement: false,
-				},
-				hozAlign: "center",
-				headerFilter: "tickCross",
-				headerFilterParams: { defaultValue: "true", tristate: true },
+				field: "code",
+				headerFilter: "input",
 				headerHozAlign: "center",
-				headerSort: false,
+				hozAlign: "center",
 				responsive: 2,
-				title: "2:1",
-				tooltip: imgTooltipFn("ar21"),
-				width: 100,
+				title: "Codepoint",
+				width: 175,
 			},
 			{
-				cellDblClick: imgClickFn("icon", "&zoom=icons"),
-				field: "icon",
-				formatter: "tickCross",
-				formatterParams: { crossElement: false },
-				hozAlign: "center",
-				headerFilter: "tickCross",
-				headerFilterParams: { tristate: true },
+				field: "code",
+				headerFilter: "input",
 				headerHozAlign: "center",
-				headerSort: false,
+				hozAlign: "center",
 				responsive: 2,
-				title: "Icon",
-				tooltip: imgTooltipFn("icon"),
-				width: 100,
+				title: "Example",
+				width: 175,
 			},
 			{
-				cellDblClick: imgClickFn("tile", "&zoom=max"),
-				field: "tile",
-				formatter: "tickCross",
-				formatterParams: {
-					crossElement: false,
-				},
-				hozAlign: "center",
-				headerFilter: "tickCross",
-				headerFilterParams: { tristate: true },
+				field: "block",
+				headerFilter: "input",
 				headerHozAlign: "center",
-				headerSort: false,
+				hozAlign: "center",
 				responsive: 2,
-				title: "Tile",
-				tooltip: imgTooltipFn("tile"),
-				width: 100,
+				title: "Block",
+				width: 175,
 			},
 			{
-				cellDblClick: imgClickFn("ar21", "&zoom=4"),
-				field: "wikipedia",
-				formatter: tickLinkFormatter,
-				formatterParams: {
-					crossElement: false,
-				},
-				hozAlign: "center",
-				headerFilter: "tickCross",
-				headerFilterFunc: tickLinkFilter,
-				headerFilterParams: { defaultValue: "true", tristate: true },
+				field: "category",
+				headerFilter: "input",
 				headerHozAlign: "center",
-				headerSort: false,
+				hozAlign: "center",
 				responsive: 2,
-				title: "Wikipedia",
-				tooltip: (e, cell) => cell.getData().wikipedia || "n/a",
-				width: 100,
+				title: "Category",
+				width: 175,
 			},
 			{
-				cellDblClick: imgClickFn("ar21", "&zoom=4"),
-				field: "guide",
-				formatter: tickLinkFormatter,
-				formatterParams: {
-					crossElement: false,
-				},
-				hozAlign: "center",
-				headerFilter: "tickCross",
-				headerFilterFunc: tickLinkFilter,
-				headerFilterParams: { defaultValue: "true", tristate: true },
+				field: "age",
+				headerFilter: "input",
 				headerHozAlign: "center",
-				headerSort: false,
+				hozAlign: "center",
 				responsive: 2,
-				title: "Guide",
-				tooltip: (e, cell) => cell.getData().guide || "n/a",
+				title: "Version",
 				width: 100,
 			},
 			{
@@ -412,8 +270,8 @@ async function main() {
 				formatterParams: {
 					labelField: "name",
 					url: (cell) => {
-						var handle = cell.getData().logohandle;
-						return `https://www.vectorlogo.zone/logos/${handle}/`;
+						var codepoint = cell.getData().code;
+						return `https://www.fileformat.info/info/unicode/char/${codepoint}/index.htm`;
 					},
 					target: "_blank",
 				},
@@ -427,7 +285,6 @@ async function main() {
 				title: "Tags",
 				field: "tags",
 				formatter: tagFormatter,
-				headerFilter: false,
 				headerSort: false,
 				responsive: 0,
 				width: 375,
@@ -440,16 +297,16 @@ async function main() {
 		placeholder: "No matches",
 		responsiveLayout: "hide",
 		footerElement: `<span class="w-100 mx-2 my-1">
-                <a href="https://www.vectorlogo.zone/"><img src="/favicon.svg" class="pe-2" style="height:1.2em;" alt="VLZ logo"/>VectorLogo.Zone</a> Reports
+                <img src="/favicon.svg" class="pe-2" style="height:1.2em;" alt="UnicodeSearch logo"/>UnicodeSearch
                 <span id="rowcount" class="px-3">Rows: ${data.length.toLocaleString()}</span>
-                <a class="d-none d-lg-block float-end" href="https://github.com/VectorLogoZone/vlz-report">Source</a>
+                <a class="d-none d-lg-block float-end" href="https://github.com/FileFormatInfo/unicodesearch">Source</a>
             </span>`,
 	});
 
 	table.on("dataFiltered", function (filters, rows) {
 		var el = document.getElementById("rowcount");
 		if (filters && filters.length > 0) {
-			el!.innerHTML = `Rows: ${rows.length.toLocaleString()} (of ${data.length.toLocaleString()})`;
+			el!.innerHTML = `Rows: ${rows.length.toLocaleString()} of ${data.length.toLocaleString()}`;
 		} else {
 			el!.innerHTML = `Rows: ${data.length.toLocaleString()}`;
 		}
