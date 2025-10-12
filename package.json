@@ -3,7 +3,8 @@
   "description": "UnicodeSearch",
   "devDependencies": {
     "@types/node": "^24.3.1",
-    "@types/unzipper": "^0.10.11",
+    "@types/tabulator-tables": "^6.2.11",
+    "fast-xml-parser": "^5.3.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.9"
   },
@@ -19,10 +20,7 @@
   "type": "commonjs",
   "version": "1.0.0",
   "dependencies": {
-    "@types/tabulator-tables": "^6.2.11",
     "bootstrap": "^5.3.8",
-    "fast-xml-parser": "^5.3.0",
-    "tabulator-tables": "^6.3.1",
-    "unzipper": "^0.12.3"
+    "tabulator-tables": "^6.3.1"
   }
 }

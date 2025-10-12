@@ -32,6 +32,9 @@ type SearchData = {
 
 const dataUrl = "/ucd.json";
 
+function fmtCategory(cell: CellComponent) {
+	const val = cell.getValue() as string;
+}
 
 function imgTooltipFn(imgType: string) {
 	return function (e: MouseEvent, cell: CellComponent, onRendered: any) {
@@ -257,11 +260,12 @@ async function main() {
 			{
 				field: "age",
 				headerFilter: "input",
+				headerFilterFunc: "starts",
 				headerHozAlign: "center",
 				hozAlign: "center",
 				responsive: 2,
 				title: "Version",
-				width: 100,
+				width: 125,
 			},
 			{
 				title: "Name",
