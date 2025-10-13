@@ -44,6 +44,15 @@ function fmtCodepoint(cell: CellComponent) {
 	return `U+${val.toUpperCase()}`;
 }
 
+function fmtExampleString(cell: CellComponent) {
+	const val = cell.getValue() as string;
+	if (!val) {
+		return "";
+	}
+	const codepoints = val.split(" ").map((cp) => parseInt(cp, 16));
+	return String.fromCodePoint(...codepoints);
+}
+
 function imgTooltipFn(imgType: string) {
 	return function (e: MouseEvent, cell: CellComponent, onRendered: any) {
 		var value = cell.getValue();
@@ -243,7 +252,14 @@ async function main() {
 			},
 			{
 				field: "code",
+				formatter: fmtExampleString,
 				headerFilter: "input",
+				headerFilterFunc: (headerValue, rowValue, rowData, filterParams) => {
+					if (!headerValue || headerValue.length != 1) return true;
+					const headerInt = headerValue.codePointAt(0);
+					const headerHex = headerInt.toString(16).toUpperCase().padStart(4, "0");
+					return headerHex == rowData.code;
+				},
 				headerHozAlign: "center",
 				hozAlign: "center",
 				responsive: 2,
@@ -280,7 +296,7 @@ async function main() {
 			},
 			{
 				title: "Name",
-				field: "sort",
+				field: "name",
 				formatter: "link",
 				formatterParams: {
 					labelField: "name",
