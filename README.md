@@ -21,7 +21,6 @@ See it in action: [unicodesear.ch](https://unicodesear.ch)
 
 ## To Do
 
-- [ ] U+ prefix on codepoints
 - [ ] name sort not working
 - [ ] numeric search for codepoints
 - [ ] codepoint sort should be numeric

@@ -36,6 +36,14 @@ function fmtCategory(cell: CellComponent) {
 	const val = cell.getValue() as string;
 }
 
+function fmtCodepoint(cell: CellComponent) {
+	const val = cell.getValue() as string;
+	if (!val) {
+		return "";
+	}
+	return `U+${val.toUpperCase()}`;
+}
+
 function imgTooltipFn(imgType: string) {
 	return function (e: MouseEvent, cell: CellComponent, onRendered: any) {
 		var value = cell.getValue();
@@ -146,11 +154,10 @@ function nameFilter(
 	filterParams: any
 ) {
 	if (!headerValue) return true;
-	if (!sortValue) return false;
 
 	const rowValue = rowData.name;
 
-	if (headerValue.length == 1) {
+	if (headerValue.length == 1 && headerValue != "^" && headerValue != "/") {
 		// single character, do starts with
 		const search = headerValue.toLowerCase();
 		return rowValue.toLowerCase().startsWith(search);
@@ -158,6 +165,9 @@ function nameFilter(
 
 	if (headerValue.startsWith("^")) {
 		// starts with
+		if (headerValue.length == 1) {
+			return true;
+		}
 		const search = headerValue.substring(1).toLowerCase();
 		return rowValue.toLowerCase().startsWith(search);
 	}
@@ -223,6 +233,7 @@ async function main() {
 		columns: [
 			{
 				field: "code",
+				formatter: fmtCodepoint,
 				headerFilter: "input",
 				headerHozAlign: "center",
 				hozAlign: "center",
@@ -282,7 +293,7 @@ async function main() {
 				headerFilter: "input",
 				headerFilterFunc: nameFilter,
 				responsive: 0,
-				sorter: "string",
+				//sorter: "string",
 				width: 375,
 			},
 			{
