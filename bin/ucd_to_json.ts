@@ -14,6 +14,8 @@ type SearchEntry = {
 	age: string;
 	block: string;
 	category: string;
+	script: string;
+	tags?: string[];
 }
 
 type SearchData = {
@@ -44,15 +46,58 @@ async function main() {
 	});
 	const jsonObj = parser.parse(xmlData);
 
+	console.log(`INFO: parsed ${jsonObj.ucd.repertoire.char.length} characters`);
+
+	if (true) {
+		fs.writeFile(
+			path.join(__dirname, "..", "tmp", "ucd.all.flat.json"),
+			JSON.stringify(jsonObj, null, 2),
+			"utf-8"
+		);
+	}
+
+	console.log(`INFO: generating JSON data`);
 	const entries: SearchEntry[] = [];
 
 	for (const charData of jsonObj.ucd.repertoire.char) {
+
+		if (!charData.cp || charData.cp.length === 0) {
+			if (!charData['first-cp']) {	// some private use area ranges mixed in
+				console.log(`WARN: skipping entry with no code point (${JSON.stringify(charData)})`);
+			}
+			continue;
+		}
+
+		const tags: string[] = [];
+		if (charData.WSpace === 'Y') {
+			tags.push('Whitespace');
+		}
+		if (charData.Emoji === 'Y') {
+			tags.push('Emoji');
+		}
+		if (charData.Dep === 'Y') {
+			tags.push('Deprecated');
+		}
+		if (charData.QMark === 'Y') {
+			tags.push('Quote');
+		}
+		if (charData.Dash === 'Y') {
+			tags.push('Dash');
+		}
+
+		var name = charData.na || charData.na1;
+		if (!name && charData['name-alias']) {
+			name = charData['name-alias'][0].alias;
+		}
+
 		entries.push({
 			code: charData.cp,
-			name: charData.na || charData.na1,
+			name: name || "(no name)",
 			age: charData.age,
-			block: charData.blk,
+			block: charData.blk.replaceAll('_', ' '),
 			category: charData.gc,
+			script: charData.sc,
+			tags: tags.length ? tags : undefined,
 		});
 	}
 
