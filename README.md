@@ -1,5 +1,6 @@
 # UnicodeSearch <img alt="VectorLogoZone logo" src="public/favicon.svg" height="90" align="right" />
 
+[![deploy](https://github.com/FileFormatInfo/unicodesearch/actions/workflows/ghpages-deploy.yaml/badge.svg)](https://github.com/FileFormatInfo/unicodesearch/actions/workflows/ghpages-deploy.yaml)
 
 A web app for searching and browsing the Unicode character database.
 
@@ -31,10 +32,6 @@ See it in action: [unicodesearch.org](https://www.unicodesearch.org/)
 - [ ] copy to clipboard button
 - [ ] test dark mode
 - [ ] share links in footer
-- [ ] test responsive layout
-- [ ] expand category abbreviations
-- [ ] category search: 2 char=>use abbreviation, 3+ char=>search full name
-- [ ] name search
 - [ ] tips for name search
-- [ ] tags: bidi, emoji, letter, number, punctuation, symbol, whitespace
+- [ ] tags: bidi, letter, number
 - [ ] tag filters

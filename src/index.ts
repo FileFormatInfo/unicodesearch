@@ -19,6 +19,7 @@ import {
 
 type SearchEntry = {
 	code: string;
+	example: string;
 	name: string;
 	age: string;
 	block: string;
@@ -65,6 +66,11 @@ const categoryMap: { [key: string]: string } = {
 	"Zl": "Separator, Line",
 	"Zp": "Separator, Paragraph",
 	"Zs": "Separator, Space"
+}
+
+// translates from a hex codepoint string to the actual character
+function codeToString(code: string):string {
+	return String.fromCodePoint(parseInt(code, 16));
 }
 
 function filterCategory(
@@ -141,15 +147,6 @@ function fmtCodepoint(cell: CellComponent) {
 		return "";
 	}
 	return `U+${val.toUpperCase()}`;
-}
-
-function fmtExampleString(cell: CellComponent) {
-	const val = cell.getValue() as string;
-	if (!val) {
-		return "";
-	}
-	const codepoints = val.split(" ").map((cp) => parseInt(cp, 16));
-	return String.fromCodePoint(...codepoints);
 }
 
 function fmtTags(cell: CellComponent) {
@@ -279,6 +276,10 @@ async function main() {
 
 	data = rawData.data;
 
+	for (const row of data) {
+		row.example = codeToString(row.code);
+	}
+
 	console.log(data[0]);
 
 	Tabulator.registerModule([
@@ -299,42 +300,44 @@ async function main() {
 		data,
 		columns: [
 			{
+				field: "example",
+				headerFilter: "input",
+				headerFilterFunc: (
+					headerValue,
+					rowValue,
+					rowData,
+					filterParams
+				) => {
+					if (!headerValue) return true;
+					return headerValue == rowValue;
+				},
+				headerHozAlign: "center",
+				hozAlign: "center",
+				responsive: 0,
+				title: "Character",
+				width: 150,
+			},
+			{
 				field: "code",
 				formatter: fmtCodepoint,
 				headerFilter: "input",
 				headerHozAlign: "center",
 				hozAlign: "center",
-				responsive: 2,
-				sorter: function(a, b, aRow, bRow, column, dir, sorterParams) {
+				responsive: 10,
+				sorter: function (a, b, aRow, bRow, column, dir, sorterParams) {
 					const aInt = parseInt(a, 16);
 					const bInt = parseInt(b, 16);
 					return aInt - bInt;
 				},
 				title: "Codepoint",
-				width: 175,
-			},
-			{
-				field: "code",
-				formatter: fmtExampleString,
-				headerFilter: "input",
-				headerFilterFunc: (headerValue, rowValue, rowData, filterParams) => {
-					if (!headerValue || headerValue.length != 1) return true;
-					const headerInt = headerValue.codePointAt(0);
-					const headerHex = headerInt.toString(16).toUpperCase().padStart(4, "0");
-					return headerHex == rowData.code;
-				},
-				headerHozAlign: "center",
-				hozAlign: "center",
-				responsive: 2,
-				title: "Example",
-				width: 175,
+				width: 150,
 			},
 			{
 				field: "block",
 				headerFilter: "input",
 				headerHozAlign: "center",
 				hozAlign: "center",
-				responsive: 2,
+				responsive: 20,
 				title: "Block",
 				width: 175,
 			},
@@ -345,9 +348,19 @@ async function main() {
 				headerFilterFunc: filterCategory,
 				headerHozAlign: "center",
 				hozAlign: "center",
-				responsive: 2,
+				responsive: 40,
 				title: "Category",
 				width: 200,
+			},
+			{
+				field: "script",
+				headerFilter: "input",
+				headerFilterFunc: "starts",
+				headerHozAlign: "center",
+				hozAlign: "center",
+				responsive: 50,
+				title: "Script",
+				width: 100,
 			},
 			{
 				field: "age",
@@ -355,9 +368,9 @@ async function main() {
 				headerFilterFunc: "starts",
 				headerHozAlign: "center",
 				hozAlign: "center",
-				responsive: 2,
+				responsive: 30,
 				title: "Version",
-				width: 125,
+				width: 110,
 			},
 			{
 				title: "Name",
@@ -382,7 +395,7 @@ async function main() {
 				field: "tags",
 				formatter: fmtTags,
 				headerSort: false,
-				responsive: 0,
+				responsive: 15,
 				width: 375,
 			},
 		],
