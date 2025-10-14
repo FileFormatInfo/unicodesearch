@@ -26,8 +26,7 @@ See it in action: [unicodesearch.org](https://www.unicodesearch.org/)
 
 ## To Do
 
-- [ ] numeric search for codepoints
-- [ ] codepoint sort should be numeric
+
 - [ ] preview column (SVGs)
 - [ ] copy to clipboard button
 - [ ] test dark mode

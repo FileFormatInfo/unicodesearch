@@ -32,8 +32,106 @@ type SearchData = {
 
 const dataUrl = "/ucd.json";
 
+const categoryMap: { [key: string]: string } = {
+	"Cc": "Other, Control",
+	"Cf": "Other, Format",
+	"Cn": "Other, Not Assigned (no characters in the file have this property)",
+	"Co": "Other, Private Use",
+	"Cs": "Other, Surrogate",
+	"LC": "Letter, Cased",
+	"Ll": "Letter, Lowercase",
+	"Lm": "Letter, Modifier",
+	"Lo": "Letter, Other",
+	"Lt": "Letter, Titlecase",
+	"Lu": "Letter, Uppercase",
+	"Mc": "Mark, Spacing Combining",
+	"Me": "Mark, Enclosing",
+	"Mn": "Mark, Nonspacing",
+	"Nd": "Number, Decimal Digit",
+	"Nl": "Number, Letter",
+	"No": "Number, Other",
+	"Pc": "Punctuation, Connector",
+	"Pd": "Punctuation, Dash",
+	"Pe": "Punctuation, Close",
+	"Pf": "Punctuation, Final quote (may behave like Ps or Pe depending on usage)",
+	"Pi": "Punctuation, Initial quote (may behave like Ps or Pe depending on usage)",
+	"Po": "Punctuation, Other",
+	"Ps": "Punctuation, Open",
+	"Sc": "Symbol, Currency",
+	"Sk": "Symbol, Modifier",
+	"Sm": "Symbol, Math",
+	"So": "Symbol, Other",
+	"Zl": "Separator, Line",
+	"Zp": "Separator, Paragraph",
+	"Zs": "Separator, Space"
+}
+
+function filterCategory(
+	headerValue: string,
+	rowValue: string,
+	rowData: any,
+	filterParams: any
+) {
+	if (!headerValue) return true;
+
+	const headerUpper = headerValue.toUpperCase();
+	if (headerValue.length == 2) {
+		return rowValue.toUpperCase() == headerUpper;
+	}
+
+	const description = categoryMap[rowValue].toUpperCase();
+
+	return description.startsWith(headerUpper);
+}
+
+function filterName(
+	headerValue: string,
+	sortValue: string,
+	rowData: any,
+	filterParams: any
+) {
+	if (!headerValue) return true;
+
+	const rowValue = rowData.name;
+
+	if (headerValue.length == 1 && headerValue != "^" && headerValue != "/") {
+		// single character, do starts with
+		const search = headerValue.toLowerCase();
+		return rowValue.toLowerCase().startsWith(search);
+	}
+
+	if (headerValue.startsWith("^")) {
+		// starts with
+		if (headerValue.length == 1) {
+			return true;
+		}
+		const search = headerValue.substring(1).toLowerCase();
+		return rowValue.toLowerCase().startsWith(search);
+	}
+
+	if (headerValue.startsWith("/") && headerValue.endsWith("/")) {
+		// regex
+		const pattern = headerValue.substring(1, headerValue.length - 1);
+		try {
+			const re = new RegExp(pattern, "i");
+			return re.test(rowValue);
+		} catch (e) {
+			// bad regex
+			return false;
+		}
+	}
+
+	// contains
+	const search = headerValue.toLowerCase();
+	return rowValue.toLowerCase().includes(search);
+}
+
 function fmtCategory(cell: CellComponent) {
 	const val = cell.getValue() as string;
+	if (!val) {
+		return "(missing)";
+	}
+	return categoryMap[val] || val;
 }
 
 function fmtCodepoint(cell: CellComponent) {
@@ -156,47 +254,7 @@ function makeTagMap(row: any, socialmedia: SocialMedia[]): Map<string, string> {
 	return tagMap;
 }
 
-function nameFilter(
-	headerValue: string,
-	sortValue: string,
-	rowData: any,
-	filterParams: any
-) {
-	if (!headerValue) return true;
 
-	const rowValue = rowData.name;
-
-	if (headerValue.length == 1 && headerValue != "^" && headerValue != "/") {
-		// single character, do starts with
-		const search = headerValue.toLowerCase();
-		return rowValue.toLowerCase().startsWith(search);
-	}
-
-	if (headerValue.startsWith("^")) {
-		// starts with
-		if (headerValue.length == 1) {
-			return true;
-		}
-		const search = headerValue.substring(1).toLowerCase();
-		return rowValue.toLowerCase().startsWith(search);
-	}
-
-	if (headerValue.startsWith("/") && headerValue.endsWith("/")) {
-		// regex
-		const pattern = headerValue.substring(1, headerValue.length - 1);
-		try {
-			const re = new RegExp(pattern, "i");
-			return re.test(rowValue);
-		} catch (e) {
-			// bad regex
-			return false;
-		}
-	}
-
-	// contains
-	const search = headerValue.toLowerCase();
-	return rowValue.toLowerCase().includes(search);
-}
 
 async function main() {
 	let data: SearchEntry[];
@@ -282,12 +340,14 @@ async function main() {
 			},
 			{
 				field: "category",
+				formatter: fmtCategory,
 				headerFilter: "input",
+				headerFilterFunc: filterCategory,
 				headerHozAlign: "center",
 				hozAlign: "center",
 				responsive: 2,
 				title: "Category",
-				width: 175,
+				width: 200,
 			},
 			{
 				field: "age",
@@ -312,7 +372,7 @@ async function main() {
 					target: "_blank",
 				},
 				headerFilter: "input",
-				headerFilterFunc: nameFilter,
+				headerFilterFunc: filterName,
 				responsive: 0,
 				//sorter: "string",
 				width: 375,
