@@ -3,7 +3,12 @@
 
 A web app for searching and browsing the Unicode character database.
 
-See it in action: [unicodesear.ch](https://unicodesear.ch)
+See it in action: [unicodesearch.org](https://www.unicodesearch.org/)
+
+## Links
+
+- [Unicode Character Database](https://www.unicode.org/Public/17.0.0/ucd/) - XML data source for this app.
+- [Unicode Annex #42](https://www.unicode.org/reports/tr42/) - what the fields in the UCD mean.
 
 ## Credits
 
@@ -21,11 +26,9 @@ See it in action: [unicodesear.ch](https://unicodesear.ch)
 
 ## To Do
 
-- [ ] name sort not working
 - [ ] numeric search for codepoints
 - [ ] codepoint sort should be numeric
 - [ ] preview column (SVGs)
-- [ ] preview column (font)
 - [ ] copy to clipboard button
 - [ ] test dark mode
 - [ ] share links in footer

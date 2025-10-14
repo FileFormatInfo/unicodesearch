@@ -247,6 +247,11 @@ async function main() {
 				headerHozAlign: "center",
 				hozAlign: "center",
 				responsive: 2,
+				sorter: function(a, b, aRow, bRow, column, dir, sorterParams) {
+					const aInt = parseInt(a, 16);
+					const bInt = parseInt(b, 16);
+					return aInt - bInt;
+				},
 				title: "Codepoint",
 				width: 175,
 			},
