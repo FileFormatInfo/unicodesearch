@@ -5,6 +5,7 @@ import "../node_modules/tabulator-tables/dist/css/tabulator_bootstrap5.min.css";
 import {
 	CellComponent,
 	EditModule,
+	Filter,
 	FilterModule,
 	FormatModule,
 	InteractionModule,
@@ -12,6 +13,7 @@ import {
 	ResizeColumnsModule,
 	ResizeTableModule,
 	ResponsiveLayoutModule,
+	Sorter,
 	SortModule,
 	Tabulator,
 	TooltipModule,
@@ -282,6 +284,25 @@ async function main() {
 
 	console.log(data[0]);
 
+	const qs = new URLSearchParams(window.location.search);
+	const sort: Sorter[] = [ { column: "code", dir: "asc" } ];
+	const filters: Filter[] = [];
+	if (qs) {
+		;
+		for (const [key, value] of qs.entries()) {
+			if (key == "sort") {
+				sort[0].column = value;
+				continue;
+			}
+			if (key == "dir") {
+				sort[0].dir = (value == "desc") ? "desc" : "asc";
+			}
+			if (key && value) {
+				filters.push({ field: key, type: "=", value: value });
+			}
+		}
+	}
+
 	Tabulator.registerModule([
 		EditModule,
 		FilterModule,
@@ -300,6 +321,20 @@ async function main() {
 		data,
 		columns: [
 			{
+				cellClick: (e, cell) => {
+					const data = cell.getRow().getData();
+					e.preventDefault();
+					e.stopPropagation();
+					table.alert(`${data.name} (U+${data.code}) copied to clipboard`);
+					setTimeout(() => table.clearAlert(), 1000);
+					navigator.clipboard.writeText(data.example);
+				},
+				field: "",
+				formatter: () => `<img src="/images/icons/clipboard.svg" alt="Copy to clipboard" height="16">`,
+				headerSort: false,
+				title: "",
+			},
+			{
 				field: "example",
 				headerFilter: "input",
 				headerFilterFunc: (
@@ -312,6 +347,7 @@ async function main() {
 					return headerValue == rowValue;
 				},
 				headerHozAlign: "center",
+				headerSort: false,
 				hozAlign: "center",
 				responsive: 0,
 				title: "Character",
@@ -386,6 +422,9 @@ async function main() {
 				},
 				headerFilter: "input",
 				headerFilterFunc: filterName,
+				headerPopup: `Use <code>^</code> to search at the beginning<br/>Use <code>/regex/</code> to search with a regular expression`,
+				headerPopupIcon:
+					'<span class="badge rounded-pill text-bg-primary">?</span>',
 				responsive: 0,
 				//sorter: "string",
 				width: 375,
@@ -400,7 +439,7 @@ async function main() {
 			},
 		],
 		height: "100%",
-		//initialHeaderFilter: [{ field: "ar21", type: "=", value: true }],
+		initialHeaderFilter: filters,
 		initialSort: [{ column: "code", dir: "asc" }],
 		layout: "fitDataStretch",
 		placeholder: "No matches",
@@ -416,9 +455,25 @@ async function main() {
 		var el = document.getElementById("rowcount");
 		if (filters && filters.length > 0) {
 			el!.innerHTML = `Rows: ${rows.length.toLocaleString()} of ${data.length.toLocaleString()}`;
+			var qs = filters
+				.map(f => `${encodeURIComponent(f.field)}=${encodeURIComponent(f.value)}`)
+				.join("&");
+			qs += `&sort=${table.getSorters()[0]?.column.getField()}&dir=${table.getSorters()[0]?.dir}`;
+			window.history.replaceState(null, "", "?" + qs);
 		} else {
 			el!.innerHTML = `Rows: ${data.length.toLocaleString()}`;
 		}
+	});
+
+	table.on("dataSorted", function (sorters, rows) {
+		var qs = `sort=${sorters[0]?.column.getField()}&dir=${sorters[0]?.dir}`;
+		const filters = table.getFilters(true);
+		if (filters && filters.length > 0) {
+			qs = filters
+				.map(f => `${encodeURIComponent(f.field)}=${encodeURIComponent(f.value)}`)
+				.join("&") + "&" + qs;
+		}
+		window.history.replaceState(null, "", "?" + qs);
 	});
 
 	document.getElementById("loading")!.style.display = "none";
