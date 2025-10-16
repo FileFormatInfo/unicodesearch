@@ -1,5 +1,4 @@
 import "./styles.css";
-import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import "../node_modules/tabulator-tables/dist/css/tabulator_bootstrap5.min.css";
 
 import {

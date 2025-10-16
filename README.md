@@ -27,11 +27,12 @@ See it in action: [unicodesearch.org](https://www.unicodesearch.org/)
 
 ## To Do
 
-
+- [ ] handle `#` in name
+- [ ] accurate total count
 - [ ] preview column (SVGs)
-- [ ] copy to clipboard button
+- [ ] bigger font for example column
+- [ ] status (for filter/sort) in footer
 - [ ] test dark mode
 - [ ] share links in footer
-- [ ] tips for name search
 - [ ] tags: bidi, letter, number
 - [ ] tag filters
