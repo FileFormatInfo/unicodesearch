@@ -134,6 +134,31 @@ function filterName(
 	return rowValue.toLowerCase().includes(search);
 }
 
+function filterTags(
+	headerValue: string,
+	rowValue: string[],
+	rowData: any,
+	filterParams: any
+) {
+	if (!headerValue || headerValue.length == 0) return true;
+
+	const headerVals = headerValue.split(/[ ,]+/);
+	const rowVals:string[] = rowValue || [];
+
+	for (const filterVal of headerVals) {
+		if (filterVal.startsWith("!")) {
+			if (rowVals.indexOf(filterVal.slice(1)) != -1) {
+				return false;
+			}
+		} else {
+			if (rowVals.indexOf(filterVal) == -1) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 function fmtCategory(cell: CellComponent) {
 	const val = cell.getValue() as string;
 	if (!val) {
@@ -165,6 +190,12 @@ function fmtTags(cell: CellComponent) {
 		el.className =
 			"badge border border-primary text-primary me-1 mb-1 text-decoration-none";
 		el.textContent = key;
+		el.style.cursor = "pointer";
+		el.onclick = (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			toggleTagFilter(cell, key);
+		}
 		container.appendChild(el);
 	}
 
@@ -238,21 +269,64 @@ function tickLinkFilter(
 	return true; // null case
 }
 
-function makeTagMap(row: any, socialmedia: SocialMedia[]): Map<string, string> {
-	const tagMap = new Map<string, string>();
+function toggleColumns(tbl: Tabulator, columns: string[]): void {
+	for (const col of columns) {
+		const column = tbl.getColumn(col);
+		if (column) {
+			if (column.isVisible()) {
+				column.hide();
+			} else {
+				column.show();
+			}
+		}
+	}
+}
 
-	tagMap.set("website", row.website);
-
-	for (const sm of socialmedia) {
-		if (row[sm.id]) {
-			tagMap.set(sm.id, row[sm.id]);
+function toggleTagFilter(cell: CellComponent, tag: string): void {
+	const tbl = cell.getTable();
+	var headerFilter = "";
+	const headerFilters = tbl.getHeaderFilters();
+	var existingFilter: Filter | null = null;
+	for (const hf of headerFilters) {
+		if (hf.field == "tags") {
+			headerFilter = hf.value;
+			existingFilter = hf;
+			break;
 		}
 	}
 
-	return tagMap;
+	if (existingFilter == null) {
+		console.log(`adding to blank`);
+		tbl.setHeaderFilterValue(cell.getColumn(), tag);
+	} else {
+		tbl.setHeaderFilterValue(
+			cell.getColumn(),
+			(existingFilter.value = toggleTagArray(
+				headerFilter.split(/[ ,]+/),
+				tag
+			).join(" "))
+		);
+	}
+	tbl.refreshFilter();
 }
 
+function toggleTagArray(tags: string[], tag: string): string[] {
+	var idx = tags.indexOf(tag);
+	if (idx != -1) {
+		tags.splice(idx);
+		tags.push(`!${tag}`);
+		return tags;
+	}
 
+	idx = tags.indexOf(`!${tag}`);
+	if (idx != -1) {
+		tags.splice(idx);
+		return tags;
+	}
+
+	tags.push(tag);
+	return tags;
+}
 
 async function main() {
 	let data: SearchEntry[];
@@ -324,12 +398,15 @@ async function main() {
 					const data = cell.getRow().getData();
 					e.preventDefault();
 					e.stopPropagation();
-					table.alert(`${data.name} (U+${data.code}) copied to clipboard`);
+					table.alert(
+						`${data.name} (U+${data.code}) copied to clipboard`
+					);
 					setTimeout(() => table.clearAlert(), 1000);
 					navigator.clipboard.writeText(data.example);
 				},
 				field: "",
-				formatter: () => `<img src="/images/icons/clipboard.svg" alt="Copy to clipboard" height="16">`,
+				formatter: () =>
+					`<img src="/images/icons/clipboard.svg" alt="Copy to clipboard" height="16">`,
 				headerSort: false,
 				title: "",
 			},
@@ -374,6 +451,7 @@ async function main() {
 				hozAlign: "center",
 				responsive: 20,
 				title: "Block",
+				visible: false,
 				width: 175,
 			},
 			{
@@ -385,6 +463,7 @@ async function main() {
 				hozAlign: "center",
 				responsive: 40,
 				title: "Category",
+				visible: false,
 				width: 200,
 			},
 			{
@@ -395,6 +474,7 @@ async function main() {
 				hozAlign: "center",
 				responsive: 50,
 				title: "Script",
+				visible: false,
 				width: 100,
 			},
 			{
@@ -405,6 +485,7 @@ async function main() {
 				hozAlign: "center",
 				responsive: 30,
 				title: "Version",
+				visible: false,
 				width: 110,
 			},
 			{
@@ -432,6 +513,11 @@ async function main() {
 				title: "Tags",
 				field: "tags",
 				formatter: fmtTags,
+				headerFilter: "input",
+				headerFilterFunc: filterTags,
+				headerPopup: `Separate multiple tags with space or comma.<br/>Pr	efix a tag with <code>!</code> to exclude it.`,
+				headerPopupIcon:
+					'<span class="badge rounded-pill text-bg-primary">?</span>',
 				headerSort: false,
 				responsive: 15,
 				width: 375,
@@ -444,10 +530,11 @@ async function main() {
 		placeholder: "No matches",
 		responsiveLayout: "hide",
 		footerElement: `<span class="w-100 mx-2 my-1">
-                <img src="/favicon.svg" class="pe-2" style="height:1.2em;" alt="UnicodeSearch logo"/>UnicodeSearch
-                <span id="rowcount" class="px-3">Rows: ${data.length.toLocaleString()}</span>
-                <a class="d-none d-lg-block float-end" href="https://github.com/FileFormatInfo/unicodesearch">Source</a>
-            </span>`,
+				<img src="/favicon.svg" class="pe-2" style="height:1.2em;" alt="UnicodeSearch logo"/>UnicodeSearch
+				<span id="rowcount" class="px-3">Rows: ${data.length.toLocaleString()}</span>
+				<input id="showhidecolumns" type="checkbox" class="mx-2" title="Toggle columns: Version, Block, Category, Script"/> Show/Hide Detail Columns
+				<a class="d-none d-lg-block float-end" href="https://github.com/FileFormatInfo/unicodesearch">Source</a>
+			</span>`,
 	});
 
 	table.on("dataFiltered", function (filters, rows) {
@@ -473,6 +560,11 @@ async function main() {
 				.join("&") + "&" + qs;
 		}
 		window.history.replaceState(null, "", "?" + qs);
+	});
+
+	table.on("tableBuilt", function () {
+		document.getElementById("showhidecolumns")!.onclick = () =>
+			toggleColumns(table, ["age", "block", "category", "script"]);
 	});
 
 	document.getElementById("loading")!.style.display = "none";
