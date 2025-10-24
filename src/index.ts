@@ -238,7 +238,7 @@ function fmtTags(cell: CellComponent) {
 		var el = document.createElement("span");
 		el.className =
 			"badge border border-primary text-primary me-1 mb-1 text-decoration-none";
-		el.textContent = key;
+		el.textContent = key.replace(/_/g, " ");
 		el.style.cursor = "pointer";
 		el.onclick = (e) => {
 			e.preventDefault();
@@ -362,7 +362,7 @@ function toggleTagFilter(cell: CellComponent, tag: string): void {
 function toggleTagArray(tags: string[], tag: string): string[] {
 	var idx = tags.indexOf(tag);
 	if (idx != -1) {
-		tags.splice(idx);
+		tags.splice(idx, 1);
 		//tags.push(`!${tag}`);
 		return tags;
 	}

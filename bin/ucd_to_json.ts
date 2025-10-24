@@ -85,6 +85,74 @@ async function main() {
 			tags.push('Dash');
 		}
 
+		switch (charData.nt) {
+			case 'De':
+				tags.push('Decimal');
+				break;
+			case 'Di':
+				tags.push('Digit');
+				break;
+			case 'Nu':
+				tags.push('Numeric');
+				break;
+		}
+
+		if (charData.Upper === 'Y') {
+			tags.push('Uppercase');
+		}
+		if (charData.Lower === 'Y') {
+			tags.push('Lowercase');
+		}
+		if (charData.OUpper === "Y") {
+			tags.push("Other_Uppercase");
+		}
+		if (charData.Lower === "Y") {
+			tags.push("Other_Lowercase");
+		}
+
+		if (charData.Term === 'Y') {
+			tags.push('Terminal_Punctuation');
+		}
+		if (charData.STerm === 'Y') {
+			tags.push('Sentence_Terminal');
+		}
+		if (charData.Dia === 'Y') {
+			tags.push('Diacritic');
+		}
+		if (charData.Ext === 'Y') {
+			tags.push('Extender');
+		}
+		if (charData.SD === 'Y') {
+			tags.push('Soft_Dotted');
+		}
+		if (charData.Alpha === 'Y') {
+			tags.push('Alphabetic');
+		}
+		if (charData.OAlpha === 'Y') {
+			tags.push('Other_Alphabetic');
+		}
+		if (charData.Math === 'Y') {
+			tags.push('Math');
+		}
+		if (charData.OMath === 'Y') {
+			tags.push('Other_Math');
+		}
+		if (charData.Hex === 'Y') {
+			tags.push('Hexadecimal');
+		}
+		if (charData.AHex === 'Y') {
+			tags.push('ASCII_Hexadecimal');
+		}
+		if (charData.RI === 'Y') {
+			tags.push('Regional_Indicator');
+		}
+		if (charData.NChar === 'Y') {
+			tags.push('Noncharacter_Code_Point');
+		}
+		if (charData.VS === 'Y') {
+			tags.push('Variation_Selector');
+		}
+
 		var name = charData.na || charData.na1;
 		if (!name && charData['name-alias']) {
 			name = charData['name-alias'][0].alias;
