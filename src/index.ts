@@ -81,6 +81,33 @@ function initExampleMap(data: SearchEntry[]) {
 	exampleMap["\""] = "&quot;";
 }
 
+const nameFilterMap: { [key: string]: string } = {};
+
+function initNameFilterMap(data: SearchEntry[]) {
+	for (var letter = 'A'.charCodeAt(0); letter <= 'Z'.charCodeAt(0); letter++) {
+		const char = String.fromCharCode(letter);
+		nameFilterMap[char] = `LETTER ${char}`;
+	}
+	nameFilterMap['0'] = `DIGIT ZERO`;
+	nameFilterMap['1'] = `DIGIT ONE`;
+	nameFilterMap['2'] = `DIGIT TWO`;
+	nameFilterMap['3'] = `DIGIT THREE`;
+	nameFilterMap['4'] = `DIGIT FOUR`;
+	nameFilterMap['5'] = `DIGIT FIVE`;
+	nameFilterMap['6'] = `DIGIT SIX`;
+	nameFilterMap['7'] = `DIGIT SEVEN`;
+	nameFilterMap['8'] = `DIGIT EIGHT`;
+	nameFilterMap['9'] = `DIGIT NINE`;
+	nameFilterMap[' '] = `SPACE`;
+	nameFilterMap['='] = `EQUALS`;
+	nameFilterMap['~'] = `TILDE`;
+	nameFilterMap['-'] = 'MINUS';
+	nameFilterMap[':'] = 'COLON';
+	nameFilterMap['_'] = 'UNDERSCORE';
+	nameFilterMap['?'] = 'QUESTION MARK';
+	nameFilterMap['.'] = 'FULL STOP';
+}
+
 // translates from a hex codepoint string to the actual character
 function codeToString(code: string):string {
 	return String.fromCodePoint(parseInt(code, 16));
@@ -114,10 +141,11 @@ function filterName(
 
 	const rowValue = rowData.name;
 
-	if (headerValue.length == 1 && headerValue != "^" && headerValue != "/") {
-		// single character, do starts with
-		const search = headerValue.toLowerCase();
-		return rowValue.toLowerCase().startsWith(search);
+	if (headerValue.length == 1) {
+		if (headerValue == "^") {
+			return true;
+		}
+		headerValue = nameFilterMap[headerValue] || headerValue;
 	}
 
 	if (headerValue.startsWith("^")) {
@@ -377,6 +405,7 @@ async function main() {
 	}
 
 	initExampleMap(data);
+	initNameFilterMap(data);
 
 	console.log(data[0]);
 
