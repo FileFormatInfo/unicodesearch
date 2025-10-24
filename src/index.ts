@@ -174,6 +174,13 @@ function fmtCodepoint(cell: CellComponent) {
 	}
 	return `U+${val.toUpperCase()}`;
 }
+function fmtExample(cell: CellComponent) {
+	const val = cell.getValue() as string;
+	if (!val) {
+		return "";
+	}
+	return `<span style="font-size:2em;">${val}</span>`;
+}
 
 function fmtTags(cell: CellComponent) {
 	const tags = cell.getValue() as string[];
@@ -411,7 +418,9 @@ async function main() {
 				title: "",
 			},
 			{
+				cssClass: "p-0 flex justify-content-center align-items-center",
 				field: "example",
+				formatter: fmtExample,
 				headerFilter: "input",
 				headerFilterFunc: (
 					headerValue,
@@ -426,7 +435,7 @@ async function main() {
 				headerSort: false,
 				hozAlign: "center",
 				responsive: 0,
-				title: "Character",
+				title: "Example",
 				width: 150,
 			},
 			{
