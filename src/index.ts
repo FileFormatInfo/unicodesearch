@@ -69,6 +69,18 @@ const categoryMap: { [key: string]: string } = {
 	"Zs": "Separator, Space"
 }
 
+const exampleMap: { [key: string]: string } = {};
+
+function initExampleMap(data: SearchEntry[]) {
+	for (var loop = 0; loop <= 0x1F; loop++) {
+		exampleMap[String.fromCodePoint(loop)] = String.fromCodePoint(0x2400 + loop);
+	}
+	exampleMap["<"] = "&lt;";
+	exampleMap[">"] = "&gt;";
+	exampleMap["&"] = "&amp;";
+	exampleMap["\""] = "&quot;";
+}
+
 // translates from a hex codepoint string to the actual character
 function codeToString(code: string):string {
 	return String.fromCodePoint(parseInt(code, 16));
@@ -179,7 +191,9 @@ function fmtExample(cell: CellComponent) {
 	if (!val) {
 		return "";
 	}
-	return `<span style="font-size:2em;">${val}</span>`;
+
+	const mapped = exampleMap[val] || val;
+	return `<span style="font-size:2em;">${mapped}</span>`;
 }
 
 function fmtTags(cell: CellComponent) {
@@ -361,6 +375,8 @@ async function main() {
 	for (const row of data) {
 		row.example = codeToString(row.code);
 	}
+
+	initExampleMap(data);
 
 	console.log(data[0]);
 
