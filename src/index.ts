@@ -363,7 +363,7 @@ function toggleTagArray(tags: string[], tag: string): string[] {
 	var idx = tags.indexOf(tag);
 	if (idx != -1) {
 		tags.splice(idx);
-		tags.push(`!${tag}`);
+		//tags.push(`!${tag}`);
 		return tags;
 	}
 
@@ -569,7 +569,7 @@ async function main() {
 				formatter: fmtTags,
 				headerFilter: "input",
 				headerFilterFunc: filterTags,
-				headerPopup: `Separate multiple tags with space or comma.<br/>Pr	efix a tag with <code>!</code> to exclude it.`,
+				headerPopup: `Separate multiple tags with space or comma.<br/>Prefix a tag with <code>!</code> to exclude it.`,
 				headerPopupIcon:
 					'<span class="badge rounded-pill text-bg-primary">?</span>',
 				headerSort: false,
@@ -586,7 +586,7 @@ async function main() {
 		footerElement: `<span class="w-100 mx-2 my-1">
 				<img src="/favicon.svg" class="pe-2" style="height:1.2em;" alt="UnicodeSearch logo"/>UnicodeSearch
 				<span id="rowcount" class="px-3">Rows: ${data.length.toLocaleString()}</span>
-				<input id="showhidecolumns" type="checkbox" class="mx-2" title="Toggle columns: Version, Block, Category, Script"/> Show/Hide Detail Columns
+				<input id="showhidecolumns" type="checkbox" class="ms-2 me-1" title="Toggle columns: Version, Block, Category, Script"/> Show/Hide Detail Columns
 				<a class="d-none d-lg-block float-end" href="https://github.com/FileFormatInfo/unicodesearch">Source</a>
 			</span>`,
 	});
