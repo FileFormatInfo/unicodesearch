@@ -460,6 +460,7 @@ async function main() {
 				formatter: () =>
 					`<img src="/images/icons/clipboard.svg" alt="Copy to clipboard" height="16">`,
 				headerSort: false,
+				hozAlign: "center",
 				title: "",
 			},
 			{
@@ -481,7 +482,7 @@ async function main() {
 				hozAlign: "center",
 				responsive: 0,
 				title: "Example",
-				width: 150,
+				width: 100,
 			},
 			{
 				field: "code",
@@ -496,7 +497,7 @@ async function main() {
 					return aInt - bInt;
 				},
 				title: "Codepoint",
-				width: 150,
+				width: 130,
 			},
 			{
 				field: "block",
@@ -582,7 +583,7 @@ async function main() {
 		initialSort: [{ column: "code", dir: "asc" }],
 		layout: "fitDataStretch",
 		placeholder: "No matches",
-		responsiveLayout: "hide",
+		//responsiveLayout: "hide",
 		footerElement: `<span class="w-100 mx-2 my-1">
 				<img src="/favicon.svg" class="pe-2" style="height:1.2em;" alt="UnicodeSearch logo"/>UnicodeSearch
 				<span id="rowcount" class="px-3">Rows: ${data.length.toLocaleString()}</span>
