@@ -26,6 +26,7 @@ type SearchEntry = {
 	block: string;
 	category: string;
 	tags?: string[];
+	notes?: string[];
 };
 
 type SearchData = {
@@ -139,7 +140,10 @@ function filterName(
 ) {
 	if (!headerValue) return true;
 
-	const rowValue = rowData.name;
+	const rowValues = [ rowData.name ];
+	if (rowData.notes) {
+		rowValues.push(...rowData.notes);
+	}
 
 	if (headerValue.length == 1) {
 		if (headerValue == "^") {
@@ -154,7 +158,12 @@ function filterName(
 			return true;
 		}
 		const search = headerValue.substring(1).toLowerCase();
-		return rowValue.toLowerCase().startsWith(search);
+		for (const rowValue of rowValues) {
+			if (rowValue.toLowerCase().startsWith(search)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	if (headerValue.startsWith("/") && headerValue.endsWith("/")) {
@@ -162,7 +171,12 @@ function filterName(
 		const pattern = headerValue.substring(1, headerValue.length - 1);
 		try {
 			const re = new RegExp(pattern, "i");
-			return re.test(rowValue);
+			for (const rowValue of rowValues) {
+				if (re.test(rowValue)) {
+					return true;
+				}
+			}
+			return false;
 		} catch (e) {
 			// bad regex
 			return false;
@@ -171,7 +185,12 @@ function filterName(
 
 	// contains
 	const search = headerValue.toLowerCase();
-	return rowValue.toLowerCase().includes(search);
+	for (const rowValue of rowValues) {
+		if (rowValue.toLowerCase().includes(search)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 function filterTags(
@@ -226,26 +245,33 @@ function fmtExample(cell: CellComponent) {
 
 function fmtTags(cell: CellComponent) {
 	const tags = cell.getValue() as string[];
-	if (!tags || tags.length === 0) {
+	const notes = cell.getRow().getData().notes as string[] | undefined;
+	if (!tags && !notes) {
 		return "";
 	}
 
 	const container = document.createElement("div");
 
-	const keys = tags.sort();
+	if (notes) {
+		container.textContent = notes.join(", ") + " ";
+	}
 
-	for (const key of keys) {
-		var el = document.createElement("span");
-		el.className =
-			"badge border border-primary text-primary me-1 mb-1 text-decoration-none";
-		el.textContent = key.replace(/_/g, " ");
-		el.style.cursor = "pointer";
-		el.onclick = (e) => {
-			e.preventDefault();
-			e.stopPropagation();
-			toggleTagFilter(cell, key);
+	if (tags) {
+		const keys = tags.sort();
+
+		for (const key of keys) {
+			var el = document.createElement("span");
+			el.className =
+				"badge border border-primary text-primary me-1 mb-1 text-decoration-none";
+			el.textContent = key.replace(/_/g, " ");
+			el.style.cursor = "pointer";
+			el.onclick = (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				toggleTagFilter(cell, key);
+			}
+			container.appendChild(el);
 		}
-		container.appendChild(el);
 	}
 
 	return container;
@@ -421,6 +447,7 @@ async function main() {
 			}
 			if (key == "dir") {
 				sort[0].dir = (value == "desc") ? "desc" : "asc";
+				continue;
 			}
 			if (key && value) {
 				filters.push({ field: key, type: "=", value: value });
@@ -570,7 +597,9 @@ async function main() {
 				formatter: fmtTags,
 				headerFilter: "input",
 				headerFilterFunc: filterTags,
-				headerPopup: `Separate multiple tags with space or comma.<br/>Prefix a tag with <code>!</code> to exclude it.`,
+				headerPopup: `Separate multiple tags with space or comma.<br/>
+				Prefix a tag with <code>!</code> to exclude it.<br/>
+				Notes are searched under Name.`,
 				headerPopupIcon:
 					'<span class="badge rounded-pill text-bg-primary">?</span>',
 				headerSort: false,

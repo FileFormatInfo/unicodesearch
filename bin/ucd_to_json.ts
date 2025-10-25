@@ -16,6 +16,7 @@ type SearchEntry = {
 	category: string;
 	script: string;
 	tags?: string[];
+	notes?: string[];
 }
 
 type SearchData = {
@@ -49,8 +50,10 @@ async function main() {
 	console.log(`INFO: parsed ${jsonObj.ucd.repertoire.char.length} characters`);
 
 	if (true) {
+		const allJsonPath = path.join(__dirname, "..", "tmp", "ucd.all.flat.json");
+		console.log(`INFO: writing full JSON data to ${allJsonPath}`);
 		fs.writeFile(
-			path.join(__dirname, "..", "tmp", "ucd.all.flat.json"),
+			allJsonPath,
 			JSON.stringify(jsonObj, null, 2),
 			"utf-8"
 		);
@@ -158,6 +161,42 @@ async function main() {
 			name = charData['name-alias'][0].alias;
 		}
 
+		var notes: string[] = [];
+
+		try {
+			if (charData['name-alias']) {
+				const nameAliasArray = Array.isArray(charData['name-alias']) ? charData['name-alias'] : [charData['name-alias']];
+				for (const aliasEntry of nameAliasArray) {
+					if (aliasEntry.type === "correction") {
+						notes.push(`Corrected from: ${aliasEntry.alias}`);
+						tags.push("Corrected");
+					} else if (aliasEntry.type === "abbreviation") {
+						if (name.indexOf('(') === -1) {
+							name = `${name} (${aliasEntry.alias})`;
+						} else if (name.indexOf(`(${aliasEntry.alias})`) === -1) {
+							notes.push(`Abbreviation: ${aliasEntry.alias}`);
+						}
+					} else if (aliasEntry.type === "control") {
+						if (aliasEntry.alias != name && name.indexOf(`${aliasEntry.alias} (`) === -1) {
+							notes.push(`Control Name: ${aliasEntry.alias}`);
+						}
+					} else if (aliasEntry.type === "alternate") {
+						notes.push(`Also known as: ${aliasEntry.alias}`);
+					} else if (aliasEntry.type === "figment") {
+						notes.push(`Figment Name: ${aliasEntry.alias}`);
+						tags.push("Figment");
+					} else {
+						console.log(
+							`WARN: unknown name-alias type '${aliasEntry.type}' for codepoint ${charData.cp} `
+						);
+					}
+				}
+			}
+		} catch (err) {
+			console.log(`ERROR: processing name-alias for codepoint ${charData.cp}: ${err}`);
+			console.log(`INFO: name-alias data: ${JSON.stringify(charData['name-alias'])}`);
+		}
+
 		entries.push({
 			code: charData.cp,
 			name: name || "(no name)",
@@ -166,6 +205,7 @@ async function main() {
 			category: charData.gc,
 			script: charData.sc,
 			tags: tags.length ? tags : undefined,
+			notes: notes.length ? notes : undefined,
 		});
 	}
 
