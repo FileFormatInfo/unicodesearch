@@ -489,6 +489,7 @@ async function main() {
 				headerSort: false,
 				hozAlign: "center",
 				title: "",
+				width: 40,
 			},
 			{
 				cssClass: "p-0 flex justify-content-center align-items-center",
@@ -587,9 +588,7 @@ async function main() {
 				headerPopup: `Use <code>^</code> to search at the beginning<br/>Use <code>/regex/</code> to search with a regular expression`,
 				headerPopupIcon:
 					'<span class="badge rounded-pill text-bg-primary">?</span>',
-				responsive: 0,
-				//sorter: "string",
-				width: 375,
+				width: 325,
 			},
 			{
 				title: "Tags",
@@ -603,8 +602,7 @@ async function main() {
 				headerPopupIcon:
 					'<span class="badge rounded-pill text-bg-primary">?</span>',
 				headerSort: false,
-				responsive: 15,
-				width: 375,
+				minWidth: 375,
 			},
 		],
 		height: "100%",
@@ -614,9 +612,9 @@ async function main() {
 		placeholder: "No matches",
 		//responsiveLayout: "hide",
 		footerElement: `<span class="w-100 mx-2 my-1">
-				<img src="/favicon.svg" class="pe-2" style="height:1.2em;" alt="UnicodeSearch logo"/>UnicodeSearch
+				<img src="/favicon.svg" class="pe-2" style="height:1.2em;" alt="UnicodeSearch logo"/><span class=" d-none d-sm-inline">UnicodeSearch</span>
 				<span id="rowcount" class="px-3">Rows: ${data.length.toLocaleString()}</span>
-				<input id="showhidecolumns" type="checkbox" class="ms-2 me-1" title="Toggle columns: Version, Block, Category, Script"/> Show/Hide Detail Columns
+				<input id="showhidecolumns" type="checkbox" class="ms-2 me-1" title="Toggle columns: Version, Block, Category, Script"/> <span class="d-none d-md-inline">Show/Hide Detail Columns</span><span class="d-md-none">Details</span>
 				<a class="d-none d-lg-block float-end" href="https://github.com/FileFormatInfo/unicodesearch">Source</a>
 			</span>`,
 	});
