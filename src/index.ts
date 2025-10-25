@@ -585,13 +585,15 @@ async function main() {
 				},
 				headerFilter: "input",
 				headerFilterFunc: filterName,
-				headerPopup: `Use <code>^</code> to search at the beginning<br/>Use <code>/regex/</code> to search with a regular expression`,
+				headerPopup: `Use <code>^</code> to search at the beginning<br/>
+				Use <code>/regex/</code> to search with a regular expression<br/>
+				Also searches Notes`,
 				headerPopupIcon:
 					'<span class="badge rounded-pill text-bg-primary">?</span>',
 				width: 325,
 			},
 			{
-				title: "Tags",
+				title: "Notes & Tags",
 				field: "tags",
 				formatter: fmtTags,
 				headerFilter: "input",

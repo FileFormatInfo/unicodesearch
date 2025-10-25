@@ -52,7 +52,7 @@ async function main() {
 	if (true) {
 		const allJsonPath = path.join(__dirname, "..", "tmp", "ucd.all.flat.json");
 		console.log(`INFO: writing full JSON data to ${allJsonPath}`);
-		fs.writeFile(
+		await fs.writeFile(
 			allJsonPath,
 			JSON.stringify(jsonObj, null, 2),
 			"utf-8"
@@ -159,6 +159,11 @@ async function main() {
 		var name = charData.na || charData.na1;
 		if (!name && charData['name-alias']) {
 			name = charData['name-alias'][0].alias;
+		}
+
+		if (name.endsWith('#')) {
+			name = name.slice(0, -1);
+			name = name + charData.cp;
 		}
 
 		var notes: string[] = [];
