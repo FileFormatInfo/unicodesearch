@@ -110,6 +110,8 @@ function initNameFilterMap(data: SearchEntry[]) {
 	nameFilterMap['.'] = 'FULL STOP';
 }
 
+var useImages = false;
+
 // translates from a hex codepoint string to the actual character
 function codeToString(code: string):string {
 	return String.fromCodePoint(parseInt(code, 16));
@@ -238,6 +240,11 @@ function fmtExample(cell: CellComponent) {
 	const val = cell.getValue() as string;
 	if (!val) {
 		return "";
+	}
+	if (useImages) {
+		const codepoint = cell.getRow().getData().code;
+		const prefix = codepoint.slice(0, -2);
+		return `<img src="https://ucd-images.fileformat.info/${prefix}/u${codepoint.toLowerCase()}.svg" alt="U+${codepoint}" style="height:2em;">`;
 	}
 
 	const mapped = exampleMap[val] || val;
@@ -455,6 +462,9 @@ async function main() {
 				detail = (value == "1" || value.toLowerCase() == "true");
 				continue;
 			}
+			if (key == "images") {
+				useImages = (value == "1" || value.toLowerCase() == "true");
+			}
 			if (key && value) {
 				filters.push({ field: key, type: "=", value: value });
 			}
@@ -622,7 +632,8 @@ async function main() {
 		footerElement: `<span class="w-100 mx-2 my-1">
 				<img src="/favicon.svg" class="pe-2" style="height:1.2em;" alt="UnicodeSearch logo"/><span class=" d-none d-sm-inline">UnicodeSearch</span>
 				<span id="rowcount" class="px-3">Rows: ${data.length.toLocaleString()}</span>
-				<input id="showhidecolumns" type="checkbox" class="ms-2 me-1" ${detail ? "checked" : ""} title="Toggle detail columns" /> <span class="d-none d-md-inline">Show/Hide Detail Columns</span><span class="d-md-none">Details</span>
+				<input id="showhidecolumns" type="checkbox" class="ms-2 me-1" ${detail ? "checked" : ""} title="Toggle detail columns" /> <span class="d-none d-md-inline">Show detail columns</span><span class="d-md-none">Details</span>
+				<input id="imagecheckbox" type="checkbox" class="ms-2 me-1" ${useImages ? "checked" : ""} title="Font vs Images" /> <span class="d-none d-md-inline">Use images in examples</span><span class="d-md-none">Images</span>
 				<a class="d-none d-lg-block float-end" href="https://github.com/FileFormatInfo/unicodesearch">Source</a>
 			</span>`,
 	});
@@ -663,6 +674,17 @@ async function main() {
 			}
 			window.history.replaceState(null, "", "?" + qs.toString());
 		}
+		document.getElementById("imagecheckbox")!.onclick = () => {
+			useImages = !useImages;
+			const qs = new URLSearchParams(window.location.search);
+			if (useImages) {
+				qs.set("images", "1");
+			} else {
+				qs.delete("images");
+			}
+			window.history.replaceState(null, "", "?" + qs.toString());
+			table.redraw(true);
+		};
 	});
 
 	document.getElementById("loading")!.style.display = "none";
