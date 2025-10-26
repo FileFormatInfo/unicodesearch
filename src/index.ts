@@ -88,6 +88,7 @@ function initNameFilterMap(data: SearchEntry[]) {
 	for (var letter = 'A'.charCodeAt(0); letter <= 'Z'.charCodeAt(0); letter++) {
 		const char = String.fromCharCode(letter);
 		nameFilterMap[char] = `LETTER ${char}`;
+		nameFilterMap[char.toLowerCase()] = `LETTER ${char}`;
 	}
 	nameFilterMap['0'] = `DIGIT ZERO`;
 	nameFilterMap['1'] = `DIGIT ONE`;
@@ -405,6 +406,7 @@ function toggleTagArray(tags: string[], tag: string): string[] {
 
 async function main() {
 	let data: SearchEntry[];
+	var detail = false;
 
 	var rawData:any;
 	try {
@@ -447,6 +449,10 @@ async function main() {
 			}
 			if (key == "dir") {
 				sort[0].dir = (value == "desc") ? "desc" : "asc";
+				continue;
+			}
+			if (key == "detail") {
+				detail = (value == "1" || value.toLowerCase() == "true");
 				continue;
 			}
 			if (key && value) {
@@ -534,7 +540,7 @@ async function main() {
 				hozAlign: "center",
 				responsive: 20,
 				title: "Block",
-				visible: false,
+				visible: detail,
 				width: 175,
 			},
 			{
@@ -546,7 +552,7 @@ async function main() {
 				hozAlign: "center",
 				responsive: 40,
 				title: "Category",
-				visible: false,
+				visible: detail,
 				width: 200,
 			},
 			{
@@ -557,7 +563,7 @@ async function main() {
 				hozAlign: "center",
 				responsive: 50,
 				title: "Script",
-				visible: false,
+				visible: detail,
 				width: 100,
 			},
 			{
@@ -568,7 +574,7 @@ async function main() {
 				hozAlign: "center",
 				responsive: 30,
 				title: "Version",
-				visible: false,
+				visible: detail,
 				width: 110,
 			},
 			{
@@ -616,39 +622,47 @@ async function main() {
 		footerElement: `<span class="w-100 mx-2 my-1">
 				<img src="/favicon.svg" class="pe-2" style="height:1.2em;" alt="UnicodeSearch logo"/><span class=" d-none d-sm-inline">UnicodeSearch</span>
 				<span id="rowcount" class="px-3">Rows: ${data.length.toLocaleString()}</span>
-				<input id="showhidecolumns" type="checkbox" class="ms-2 me-1" title="Toggle columns: Version, Block, Category, Script"/> <span class="d-none d-md-inline">Show/Hide Detail Columns</span><span class="d-md-none">Details</span>
+				<input id="showhidecolumns" type="checkbox" class="ms-2 me-1" ${detail ? "checked" : ""} title="Toggle detail columns" /> <span class="d-none d-md-inline">Show/Hide Detail Columns</span><span class="d-md-none">Details</span>
 				<a class="d-none d-lg-block float-end" href="https://github.com/FileFormatInfo/unicodesearch">Source</a>
 			</span>`,
 	});
 
 	table.on("dataFiltered", function (filters, rows) {
 		var el = document.getElementById("rowcount");
+		var qs = new URLSearchParams(window.location.search);
+		for (const col of table.getColumns()) {
+			qs.delete(col.getField());
+		}
 		if (filters && filters.length > 0) {
 			el!.innerHTML = `Rows: ${rows.length.toLocaleString()} of ${data.length.toLocaleString()}`;
-			var qs = filters
-				.map(f => `${encodeURIComponent(f.field)}=${encodeURIComponent(f.value)}`)
-				.join("&");
-			qs += `&sort=${table.getSorters()[0]?.column.getField()}&dir=${table.getSorters()[0]?.dir}`;
-			window.history.replaceState(null, "", "?" + qs);
+			for (const f of filters) {
+				qs.set(f.field, f.value as string);
+			}
 		} else {
 			el!.innerHTML = `Rows: ${data.length.toLocaleString()}`;
-		}
-	});
-
-	table.on("dataSorted", function (sorters, rows) {
-		var qs = `sort=${sorters[0]?.column.getField()}&dir=${sorters[0]?.dir}`;
-		const filters = table.getFilters(true);
-		if (filters && filters.length > 0) {
-			qs = filters
-				.map(f => `${encodeURIComponent(f.field)}=${encodeURIComponent(f.value)}`)
-				.join("&") + "&" + qs;
 		}
 		window.history.replaceState(null, "", "?" + qs);
 	});
 
+	table.on("dataSorted", function (sorters, rows) {
+		var qs = new URLSearchParams(window.location.search);
+		qs.set("sort", sorters[0]?.column.getField());
+		qs.set("dir", sorters[0]?.dir);
+		window.history.replaceState(null, "", "?" + qs);
+	});
+
 	table.on("tableBuilt", function () {
-		document.getElementById("showhidecolumns")!.onclick = () =>
+		document.getElementById("showhidecolumns")!.onclick = () => {
+			detail = !detail;
 			toggleColumns(table, ["age", "block", "category", "script"]);
+			const qs = new URLSearchParams(window.location.search);
+			if (detail) {
+				qs.set("detail", "1");
+			} else {
+				qs.delete("detail");
+			}
+			window.history.replaceState(null, "", "?" + qs.toString());
+		}
 	});
 
 	document.getElementById("loading")!.style.display = "none";
