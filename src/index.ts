@@ -411,6 +411,25 @@ function toggleTagArray(tags: string[], tag: string): string[] {
 	return tags;
 }
 
+// from https://evanhahn.com/getting-the-utf16-bytes-of-javascript-strings/
+function* utf16bytes(str:string): Iterable<number> {
+	for (let i = 0; i < str.length; i++) {
+		const charCode = str.charCodeAt(i);
+
+		// Get the most significant byte.
+		// For example, given 0x1234, yield 0x12.
+		yield(charCode & 0xff00) >> 8;
+
+		// Get the least significant byte.
+		// For example, given 0x1234, yield 0x34.
+		yield charCode & 0x00ff;
+	}
+}
+
+function utf8bytes(str:string): Uint8Array {
+	return new TextEncoder().encode(str);
+}
+
 async function main() {
 	let data: SearchEntry[];
 	var detail = false;
@@ -588,6 +607,49 @@ async function main() {
 				width: 110,
 			},
 			{
+				field: "utf8",
+				formatter: (cell) => {
+					const val = cell.getRow().getData().example as string;
+					if (!val) {
+						return "";
+					}
+					const bytes = utf8bytes(val);
+					const parts: string[] = [];
+					for (const b of bytes) {
+						parts.push(
+							b.toString(16).toUpperCase().padStart(2, "0")
+						);
+					}
+					return parts.join(" ");
+				},
+				headerHozAlign: "center",
+				headerSort: false,
+				hozAlign: "center",
+				title: "UTF-8",
+				visible: detail,
+			},
+			{
+				field: "utf16",
+				formatter: (cell) => {
+					const val = cell.getRow().getData().example as string;
+					if (!val) {
+						return "";
+					}
+					const parts: string[] = [];
+					for (const b of utf16bytes(val)) {
+						parts.push(
+							b.toString(16).toUpperCase().padStart(2, "0")
+						);
+					}
+					return parts.join(" ");
+				},
+				headerHozAlign: "center",
+				headerSort: false,
+				hozAlign: "center",
+				title: "UTF-16",
+				visible: detail,
+			},
+			{
 				title: "Name",
 				field: "name",
 				formatter: "link",
@@ -632,8 +694,12 @@ async function main() {
 		footerElement: `<span class="w-100 mx-2 my-1">
 				<img src="/favicon.svg" class="pe-2" style="height:1.2em;" alt="UnicodeSearch logo"/><span class=" d-none d-sm-inline">UnicodeSearch</span>
 				<span id="rowcount" class="px-3">Rows: ${data.length.toLocaleString()}</span>
-				<input id="showhidecolumns" type="checkbox" class="ms-2 me-1" ${detail ? "checked" : ""} title="Toggle detail columns" /> <span class="d-none d-md-inline">Show detail columns</span><span class="d-md-none">Details</span>
-				<input id="imagecheckbox" type="checkbox" class="ms-2 me-1" ${useImages ? "checked" : ""} title="Font vs Images" /> <span class="d-none d-md-inline">Use images in examples</span><span class="d-md-none">Images</span>
+				<input id="showhidecolumns" type="checkbox" class="ms-2 me-1" ${
+					detail ? "checked" : ""
+				} title="Toggle detail columns" /> <span class="d-none d-md-inline">Show detail columns</span><span class="d-md-none">Details</span>
+				<input id="imagecheckbox" type="checkbox" class="ms-2 me-1" ${
+					useImages ? "checked" : ""
+				} title="Font vs Images" /> <span class="d-none d-md-inline">Use images in examples</span><span class="d-md-none">Images</span>
 				<a class="d-none d-lg-block float-end" href="https://github.com/FileFormatInfo/unicodesearch">Source</a>
 			</span>`,
 	});
@@ -665,7 +731,7 @@ async function main() {
 	table.on("tableBuilt", function () {
 		document.getElementById("showhidecolumns")!.onclick = () => {
 			detail = !detail;
-			toggleColumns(table, ["age", "block", "category", "script"]);
+			toggleColumns(table, ["age", "block", "category", "script", "utf8", "utf16"]);
 			const qs = new URLSearchParams(window.location.search);
 			if (detail) {
 				qs.set("detail", "1");
