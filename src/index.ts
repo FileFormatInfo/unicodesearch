@@ -711,9 +711,9 @@ async function main() {
 				<input id="showhidecolumns" type="checkbox" class="ms-2 me-1" ${
 					detail ? "checked" : ""
 				} title="Toggle detail columns" /> <span class="d-none d-md-inline">Show detail columns</span><span class="d-md-none">Details</span>
-				<input id="imagecheckbox" type="checkbox" class="ms-2 me-1" ${
+				<span class="d-none"><input id="imagecheckbox" type="checkbox" class="ms-2 me-1" ${
 					useImages ? "checked" : ""
-				} title="Font vs Images" /> <span class="d-none d-md-inline">Use images in examples</span><span class="d-md-none">Images</span>
+				} title="Font vs Images" /> <span class="d-none d-md-inline">Use images in examples</span><span class="d-md-none">Images</span></span>
 				<a class="d-none d-lg-block float-end" href="https://github.com/FileFormatInfo/unicodesearch">Source</a>
 			</span>`,
 	});
