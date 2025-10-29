@@ -22,6 +22,7 @@ type SearchEntry = {
 	code: string;
 	example: string;
 	name: string;
+	entity?: string;
 	age: string;
 	block: string;
 	category: string;
@@ -146,6 +147,10 @@ function filterName(
 	const rowValues = [ rowData.name ];
 	if (rowData.notes) {
 		rowValues.push(...rowData.notes);
+	}
+	if (rowData.entity) {
+		rowValues.push(rowData.entity.replaceAll(/[^a-z]/gi, ''));
+		console.log(`DEBUG: entity rowValues: ${JSON.stringify(rowValues)}`);
 	}
 
 	if (headerValue.length == 1) {
@@ -563,6 +568,15 @@ async function main() {
 				width: 130,
 			},
 			{
+				field: "entity",
+				headerFilter: "input",
+				headerHozAlign: "center",
+				hozAlign: "left",
+				title: "HTML\u00A0Entity",
+				visible: detail,
+				width: 175,
+			},
+			{
 				field: "block",
 				headerFilter: "input",
 				headerHozAlign: "center",
@@ -731,7 +745,7 @@ async function main() {
 	table.on("tableBuilt", function () {
 		document.getElementById("showhidecolumns")!.onclick = () => {
 			detail = !detail;
-			toggleColumns(table, ["age", "block", "category", "script", "utf8", "utf16"]);
+			toggleColumns(table, ["age", "block", "category", "entity", "script", "utf8", "utf16"]);
 			const qs = new URLSearchParams(window.location.search);
 			if (detail) {
 				qs.set("detail", "1");

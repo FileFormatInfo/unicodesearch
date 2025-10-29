@@ -11,6 +11,7 @@ const __dirname = path.dirname(__filename);
 type SearchEntry = {
 	code: string;
 	name: string;
+	entity?: string;
 	age: string;
 	block: string;
 	category: string;
@@ -24,11 +25,43 @@ type SearchData = {
 	data: SearchEntry[];
 }
 
+type EntityData = {
+	[name: string]: {
+		codepoints: number[];
+		characters: string;
+	};
+}
+
 async function main() {
 	console.log(`INFO: starting at ${new Date().toISOString()}`);
 
 	const xmlPath = path.join( __dirname, '..', 'tmp', 'ucd.all.flat.xml' );
+	const entityPath = path.join( __dirname, '..', 'tmp', 'entities.json' );
 	const jsonPath = path.join( __dirname, '..', 'public', 'ucd.json' );
+
+	try {
+		await fs.access(entityPath);
+	}
+	catch (err) {
+		console.log(`ERROR: Entity file does not exist in ${entityPath}`);
+		process.exit(1);
+	}
+
+	// Read and parse the entity JSON file
+	console.log(`INFO: reading entity JSON file from ${entityPath}`);
+	const entityDataRaw = await fs.readFile(entityPath, 'utf-8');
+	console.log(`INFO: parsing entity JSON data`);
+	const entityData: EntityData = JSON.parse(entityDataRaw);
+
+	// Invert the entity data to map codepoints to entities
+	const codepointToEntity: { [codepoint: string]: string } = {};
+	for (const [entity, info] of Object.entries(entityData)) {
+		if (info.codepoints.length != 1) {
+			continue;	// skip multi-codepoint entities
+		}
+		const cpHex = info.codepoints[0].toString(16).toUpperCase().padStart(4, '0');
+		codepointToEntity[cpHex] = entity;
+	}
 
 	try {
 		await fs.access(xmlPath);
@@ -205,6 +238,7 @@ async function main() {
 		entries.push({
 			code: charData.cp,
 			name: name || "(no name)",
+			entity: codepointToEntity[charData.cp],
 			age: charData.age,
 			block: charData.blk.replaceAll('_', ' '),
 			category: charData.gc,
