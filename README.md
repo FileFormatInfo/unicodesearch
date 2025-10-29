@@ -1,6 +1,8 @@
 # UnicodeSearch <img alt="VectorLogoZone logo" src="public/favicon.svg" height="90" align="right" />
 
 [![deploy](https://github.com/FileFormatInfo/unicodesearch/actions/workflows/ghpages-deploy.yaml/badge.svg)](https://github.com/FileFormatInfo/unicodesearch/actions/workflows/ghpages-deploy.yaml)
+[![codepoints](https://img.shields.io/badge/dynamic/json.svg?label=Codepoints&url=https%3A%2F%2Fwww.unicodesearch.org%2Fstatus.json&query=%24.cpcount)](https://www.unicodesearch.org/)
+[![Status](https://img.shields.io/nodeping/status/JJXEF3OF-8HAH-4812-8MPK-ZX8JVJA3HAYF.svg?style=flat)](https://nodeping.com/reports/checks/JJXEF3OF-8HAH-4812-8MPK-ZX8JVJA3HAYF)
 
 A web app for searching and browsing the Unicode character database.
 
