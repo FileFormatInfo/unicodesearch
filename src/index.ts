@@ -508,7 +508,7 @@ async function main() {
 		TooltipModule,
 	]);
 
-	const table = new Tabulator("#achtable", {
+	const table = new Tabulator("#unicodetable", {
 		autoResize: true,
 		data,
 		columns: [
@@ -767,8 +767,8 @@ async function main() {
 		};
 	});
 
-	document.getElementById("loading")!.style.display = "none";
-	document.getElementById("achtable")!.style.display = "block";
+	document.getElementById("loading")!.classList.add("d-none");
+	document.getElementById("unicodetable")!.classList.remove("d-none");
 }
 
 main();
