@@ -8,6 +8,21 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_grammar#escape_sequences
+const jsonEscape: { [key: string]: string } = {
+	"0000": "\\0",
+	"0027": "\\'",
+	"0022": '\\"',
+	"005C": "\\\\",
+	"000A": "\\n",
+	"000D": "\\r",
+	"000B": "\\v",
+	"0009": "\\t",
+	"0008": "\\b",
+	"000c": "\\f",
+};
+
+
 type SearchEntry = {
 	code: string;
 	name: string;
@@ -233,6 +248,19 @@ async function main() {
 		} catch (err) {
 			console.log(`ERROR: processing name-alias for codepoint ${charData.cp}: ${err}`);
 			console.log(`INFO: name-alias data: ${JSON.stringify(charData['name-alias'])}`);
+		}
+
+		const jse = jsonEscape[charData.cp];
+		if (jse) {
+			notes.push(`JSON escape: '${jse}'`);
+		}
+
+		const str = String.fromCodePoint(parseInt(charData.cp, 16));
+		if (encodeURI(str) == str) {
+			tags.push(`URI-safe`);
+		}
+		if (encodeURIComponent(str) == str) {
+			tags.push(`URIComponent-safe`);
 		}
 
 		entries.push({
