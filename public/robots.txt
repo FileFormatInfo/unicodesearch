@@ -1,0 +1,9 @@
+#
+# robots.txt for UnicodeSearch.org
+#
+
+Sitemap: https://www.unicodesearch.org/sitemap.xml
+
+User-agent: *
+Disallow: /honeypot.txt
+Allow: /
