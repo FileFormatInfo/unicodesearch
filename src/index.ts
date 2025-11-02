@@ -706,7 +706,7 @@ async function main() {
 		placeholder: "No matches",
 		//responsiveLayout: "hide",
 		footerElement: `<span class="w-100 mx-2 my-1">
-				<img src="/favicon.svg" class="pe-2" style="height:1.2em;" alt="UnicodeSearch logo"/><span class=" d-none d-sm-inline">UnicodeSearch</span>
+				<img src="/favicon.svg" class="pe-2 mb-1" style="height:1.2em;" alt="UnicodeSearch logo"/><span style="font-size:1.0em;font-family:Merienda;font-weight:800;" class="d-none d-sm-inline">UnicodeSearch</span>
 				<span id="rowcount" class="px-3">Rows: ${data.length.toLocaleString()}</span>
 				<input id="showhidecolumns" type="checkbox" class="ms-2 me-1" ${
 					detail ? "checked" : ""

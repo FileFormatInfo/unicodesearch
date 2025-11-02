@@ -27,6 +27,8 @@ See it in action: [unicodesearch.org](https://www.unicodesearch.org/)
 [![VectorLogoZone](https://www.vectorlogo.zone/logos/vectorlogozone/vectorlogozone-ar21.svg)](https://www.vectorlogo.zone/ "Logos")
 [![Vite](https://www.vectorlogo.zone/logos/vitejsdev/vitejsdev-ar21.svg)](https://vitejs.dev/ "Bundler")
 
+* Eduardo Tunni: [Merienda Font](https://github.com/etunni/merienda)
+
 ## To Do
 
 - [ ] handle `#` in name
