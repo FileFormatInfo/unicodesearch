@@ -22,6 +22,14 @@ const jsonEscape: { [key: string]: string } = {
 	"000c": "\\f",
 };
 
+const htmlUnsafe = new Set<String>([
+	"003C", // <
+	"003E", // >
+	"0026", // &
+	"0027", // '
+	"0022", // "
+]);
+
 
 type SearchEntry = {
 	code: string;
@@ -261,6 +269,9 @@ async function main() {
 		}
 		if (encodeURIComponent(str) == str) {
 			tags.push(`URIComponent-safe`);
+		}
+		if (htmlUnsafe.has(charData.cp)) {
+			tags.push(`HTML-unsafe`);
 		}
 
 		entries.push({
