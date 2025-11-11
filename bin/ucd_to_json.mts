@@ -8,18 +8,16 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_grammar#escape_sequences
+// from https://datatracker.ietf.org/doc/html/rfc8259#section-7
 const jsonEscape: { [key: string]: string } = {
-	"0000": "\\0",
-	"0027": "\\'",
 	"0022": '\\"',
 	"005C": "\\\\",
+	"002F": "\\/",
+	"0008": "\\b",
+	"000C": "\\f",
 	"000A": "\\n",
 	"000D": "\\r",
-	"000B": "\\v",
 	"0009": "\\t",
-	"0008": "\\b",
-	"000c": "\\f",
 };
 
 const htmlUnsafe = new Set<String>([
