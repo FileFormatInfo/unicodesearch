@@ -1,5 +1,6 @@
 import "./styles.css";
 import "../node_modules/tabulator-tables/dist/css/tabulator_bootstrap5.min.css";
+import { scriptMap } from "./scriptMap.ts";
 
 import {
 	CellComponent,
@@ -26,6 +27,7 @@ type SearchEntry = {
 	age: string;
 	block: string;
 	category: string;
+	script: string;
 	tags?: string[];
 	notes?: string[];
 };
@@ -461,6 +463,7 @@ async function main() {
 
 	for (const row of data) {
 		row.example = codeToString(row.code);
+		row.script = scriptMap[row.script] || row.script;
 	}
 
 	initExampleMap(data);
