@@ -103,7 +103,8 @@ async function main() {
 
 	console.log(`INFO: parsed ${jsonObj.ucd.repertoire.char.length} characters`);
 
-	if (true) {
+	if (process.env["DUMP_JSON"] != null) {
+		/* this will fail with "RangeError: Invalid string length" because the UCD data is too big */
 		const allJsonPath = path.join(__dirname, "..", "tmp", "ucd.all.flat.json");
 		console.log(`INFO: writing full JSON data to ${allJsonPath}`);
 		await fs.writeFile(
